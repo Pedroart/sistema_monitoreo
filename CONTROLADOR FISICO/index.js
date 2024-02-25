@@ -28,25 +28,35 @@ for (const clave in subgrupos) {
 
 function procezado(data,operador){
   let nuevooperador=operador.replace('#',data);
-  
-  let resultado = eval(nuevooperador);
-  return resultado;
+  return eval(nuevooperador);
 }
 
-async function EJECUCION(listado){
-  for (const item of listado) {
-    const respuesta = await modbusReader(item.ip, item.DIR);
-    
-    if(respuesta.status == '100'){
-      if(! item.TRAN === ''){
-        console.log(procezado(respuesta.data.values[0],item.TRAN));
-      }
-      else{
-        console.log(respuesta.data.values[0]);
-      }
-      
-    }else{
-    }
-    
+function obtenerData(respuesta, item) {
+  if (respuesta.status !== '100') return false;
+
+  if (item.TRAN !== '') {
+      return procezado(respuesta.data.values[0], item.TRAN);
+  } else {
+      return respuesta.data.values[0];
   }
+}
+
+async function EJECUCION(listado) {
+  let respuestas = [];
+
+  for (const item of listado) {
+      const respuesta = await modbusReader(item.ip, item.DIR);
+      const data = obtenerData(respuesta, item);
+
+      const respuestaFormateada = {
+          "IP": item.ip,
+          "DIR": item.DIR,
+          "Data": data,
+          "Date": Date.now()
+      };
+
+      respuestas.push(respuestaFormateada);
+  }
+
+  console.log(respuestas);
 }
