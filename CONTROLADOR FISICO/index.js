@@ -26,9 +26,27 @@ for (const clave in subgrupos) {
   
 }
 
+function procezado(data,operador){
+  let nuevooperador=operador.replace('#',data);
+  
+  let resultado = eval(nuevooperador);
+  return resultado;
+}
+
 async function EJECUCION(listado){
   for (const item of listado) {
     const respuesta = await modbusReader(item.ip, item.DIR);
-    console.log(respuesta);
+    
+    if(respuesta.status == '100'){
+      if(! item.TRAN === ''){
+        console.log(procezado(respuesta.data.values[0],item.TRAN));
+      }
+      else{
+        console.log(respuesta.data.values[0]);
+      }
+      
+    }else{
+    }
+    
   }
 }
